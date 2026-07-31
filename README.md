@@ -124,8 +124,7 @@ lamp-gcp-zero-trust/
 │   └── variables.tf        # Environment input variables
 ├── ansible/                # Configuration Management & Hardening
 │   ├── inventory/          # Dynamic GCP Compute Inventory definitions
-│   ├── roles/              # Ansible roles (Apache, PHP-FPM, Security Hardening)
-│   └── site.yml            # Main playbook orchestration entrypoint
+│   └── roles/              # Ansible roles (Apache, PHP-FPM, Security Hardening)
 └── docs/                   # Detailed Project Documentation & Runbooks
     └── setup_guide.md      # Step-by-step infrastructure provisioning guide
 ```
