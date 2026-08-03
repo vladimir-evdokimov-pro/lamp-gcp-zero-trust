@@ -1,0 +1,21 @@
+# ==============================================================================
+# GCP Environment Configuration (Template)
+# Copy this file to 'terraform.tfvars' and replace values accordingly.
+# ==============================================================================
+
+# Target GCP Project ID (Must be pre-created during Bootstrap phase)
+project_id = "your-gcp-project-id"
+
+# Primary GCP Region and Zone for deployment
+region     = "europe-west9"
+zone       = "europe-west9-a"
+
+# List of GCP APIs to enable
+gcp_apis = [
+  "compute.googleapis.com",
+  "sqladmin.googleapis.com",
+  "secretmanager.googleapis.com",
+  "iap.googleapis.com",
+  "servicenetworking.googleapis.com",
+  "iamcredentials.googleapis.com"
+]
