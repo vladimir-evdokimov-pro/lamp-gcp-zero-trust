@@ -135,14 +135,14 @@ lamp-gcp-zero-trust/
 
 - [x] **Phase 1: Architecture & Network Topology Definition** (VPC, Subnetting, Security Boundaries)
 - [x] **Phase 2: Repository Governance** (Branch Protection, GitOps Workflows)
-- [ ] **Phase 3: Core Infrastructure Provisioning (Terraform)**
-  - [ ] Custom VPC, Subnets, Cloud NAT & Router
-  - [ ] Private Compute Instances (Web & App Tiers)
-  - [ ] Cloud SQL (MySQL) with Private Service Connect (PSC)
-- [ ] **Phase 4: Security & IAM Hardening**
-  - [ ] Workload Identity Federation setup
-  - [ ] Secret Manager integration
-  - [ ] IAP SSH Tunneling configuration
+- [x] **Phase 3: Core Infrastructure Provisioning (Terraform)**
+  - [X] Custom VPC, Subnets, Cloud NAT & Router
+  - [X] Private Compute Instances (Web & App Tiers)
+  - [X] Cloud SQL (MySQL) with Private Service Connect (PSC)
+- [X] **Phase 4: Security & IAM Hardening**
+  - [X] Workload Identity Federation setup
+  - [X] Secret Manager integration
+  - [X] IAP SSH Tunneling configuration
 - [ ] **Phase 5: Automated Configuration (Ansible)**
   - [ ] Web/App runtime setup (Apache, PHP-FPM)
   - [ ] OS Security hardening & dynamic inventory integration
