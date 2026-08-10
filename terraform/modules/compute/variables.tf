@@ -42,10 +42,32 @@ variable "web_vm_name" {
   default = "web-server1"
 }
 
+variable "web_labels" {
+  description = "Resource labels to apply to web resources"
+  type = map(string)
+  default = {
+    "role" = "web"
+    "env" = "prod"
+    "tier" = "frontend"
+    "managed_by" = "terraform"
+  }
+}
+
 variable "app_vm_name" {
   description = "Name for App instance configuration"
   type = string
   default = "app-server1"
+}
+
+variable "app_labels" {
+  description = "Resource labels to apply to app resources"
+  type = map(string)
+  default = {
+    "role" = "app"
+    "env" = "prod"
+    "tier" = "backend"
+    "managed_by" = "terraform"
+  }
 }
 
 variable "image_boot" {

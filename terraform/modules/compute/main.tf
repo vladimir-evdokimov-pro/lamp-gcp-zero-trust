@@ -20,6 +20,8 @@ resource "google_compute_instance" "web_vm" {
     scopes = [ "cloud-platform" ]
   }
 
+  labels = var.web_labels
+
   metadata = {
     enable-oslogin = "TRUE"
   }
@@ -51,6 +53,8 @@ resource "google_compute_instance" "app_vm" {
     email = var.sa_app_email
     scopes = [ "cloud-platform" ]
   }
+
+  labels = var.app_labels
 
   metadata = {
     enable-oslogin = "TRUE"
