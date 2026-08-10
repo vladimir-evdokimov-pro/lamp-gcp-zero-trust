@@ -37,7 +37,7 @@ variable "psc_ip_name" {
 variable "psc_ip_address" {
   description = "IP address for PSC endpoint"
   type = string
-  default = "10.0.1.50"
+  default = null
 }
 
 variable "fr_psc_link_name" {
