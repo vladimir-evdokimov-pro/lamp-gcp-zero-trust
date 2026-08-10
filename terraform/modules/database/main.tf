@@ -16,6 +16,14 @@ resource "google_sql_database_instance" "db" {
       ipv4_enabled = false
     }
     availability_type = "REGIONAL"
+
+    user_labels = var.db_labels
+
+    backup_configuration {
+      enabled = true
+      binary_log_enabled = true
+    }
+
   }
 
   deletion_protection = false
