@@ -15,10 +15,10 @@ output "app_vm_private_ip" {
 
 output "db_psc_endpoint_ip" {
   description = "Private IP of the Private Service Connect endpoint for Cloud SQL"
-  value       = module.database.psc_endpoint_ip
+  value       = module.database.db_private_ip
 }
 
-output "db_secret_id" {
+output "secret_id" {
   description = "Secret Manager secret ID/name containing DB credentials"
-  value       = module.security.db_secret_id
+  value       = module.security.secret_id
 }
