@@ -1,0 +1,9 @@
+plugin: google.cloud.gcp_compute
+projects:
+  - {PROJECT_ID}
+auth_kind: application
+keyed_groups:
+  - key: labels.role
+    prefix: role
+hostnames:
+  - name
