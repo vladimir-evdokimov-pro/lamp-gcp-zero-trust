@@ -28,6 +28,17 @@ variable "db_version" {
   default = "MYSQL_8_4"
 }
 
+variable "db_labels" {
+  description = "Resource labels to apply to app resources"
+  type = map(string)
+  default = {
+    "role" = "db"
+    "env" = "prod"
+    "tier" = "database"
+    "managed_by" = "terraform"
+  }
+}
+
 variable "psc_ip_name" {
   description = "Name for IP address to PSC"
   type = string
