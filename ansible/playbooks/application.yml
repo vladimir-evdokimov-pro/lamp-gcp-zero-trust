@@ -1,0 +1,79 @@
+---
+- name: Deploy phpmyadmin on php-server
+  hosts: role_app
+  become: true
+
+  tasks:
+  - name: Install php package and necessary dependancies
+    ansible.builtin.apt:
+      update_cache: true
+      pkg:
+      - php-fpm
+      - php-cli
+      - php-mysql
+      - php-mbstring
+      - php-zip
+      - php-gd
+      - php-curl
+      - php-xml
+      state: present
+
+  - name: Get installed PHP CLI version
+    ansible.builtin.command: php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;'
+    register: installed_php_version
+    changed_when: false
+
+  - name: Start and launch php-fpm
+    ansible.builtin.systemd:
+      name: "php{{ installed_php_version.stdout }}-fpm"
+      state: started
+      enabled: true
+
+  - name: Download and upload PMA application
+    ansible.builtin.get_url:
+      url: https://files.phpmyadmin.net/phpMyAdmin/{{ pma_version | default('5.2.0') }}/phpMyAdmin-{{ pma_version | default('5.2.0') }}-all-languages.tar.gz
+      dest: /tmp/pma.tar.gz
+      mode: "0644"
+
+  - name: Create file directory for PMA application
+    ansible.builtin.file:
+      path: /var/www/pma
+      state: directory
+      owner: www-data
+      group: www-data
+      mode: "0755"
+
+  - name: Extract and Deploy PMA application
+    ansible.builtin.unarchive:
+      creates: /var/www/pma/index.php
+      src: /tmp/pma.tar.gz
+      dest: /var/www/pma
+      owner: www-data
+      group: www-data
+      remote_src: true
+      extra_opts:
+        - --strip-components=1
+
+  - name: Implement PHP configuration
+    ansible.builtin.template:
+      src: ../templates/pma_config.inc.php.j2
+      dest: /var/www/pma/config.inc.php
+      owner: www-data
+      group: www-data
+      mode: "0640"
+
+  - name: Applying PHP-FPM pool configuration
+    ansible.builtin.template:
+      src: ../templates/php_fpm_pool.conf.j2
+      dest: "/etc/php/{{ installed_php_version.stdout }}/fpm/pool.d/www.conf"
+      owner: root
+      group: root
+      mode: "0644"
+    notify:
+    - restart php-fpm
+
+  handlers:
+    - name: restart php-fpm
+      ansible.builtin.service:
+        name: "php{{ installed_php_version.stdout }}-fpm"
+        state: restarted
