@@ -1,0 +1,5 @@
+db_host: "10.0.3.2"
+pma_blowfish_secret: "2DyuI84CnXGf1MZctnv1fkXW548oAllU"
+ansible_user: "vladimir.evdokimov"
+php_fpm_port: 9000
+app_server_host: "app-server1"
