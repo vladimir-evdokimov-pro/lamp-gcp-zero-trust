@@ -1,0 +1,68 @@
+---
+- name: Deploy Apache on webservers
+  hosts: role_web
+  become: true
+
+  tasks:
+    - name: Install Apache package
+      ansible.builtin.apt:
+        update_cache: true
+        name: apache2
+        state: present 
+
+    - name: Ensure DocumentRoot directory exists
+      ansible.builtin.file:
+        path: /var/www/pma
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Download phpMyAdmin archive
+      ansible.builtin.get_url:
+        url: https://files.phpmyadmin.net/phpMyAdmin/5.2.0/phpMyAdmin-5.2.0-all-languages.tar.gz
+        dest: /tmp/phpMyAdmin.tar.gz
+        mode: '0644'
+
+    - name: Extract phpMyAdmin static assets to DocumentRoot
+      ansible.builtin.unarchive:
+        src: /tmp/phpMyAdmin.tar.gz
+        dest: /var/www/pma
+        remote_src: true
+        extra_opts: [--strip-components=1]
+        owner: www-data
+        group: www-data
+
+    - name: Copy VirtualHost configuration
+      ansible.builtin.template:
+        src: ../templates/apache_vhost.conf.j2
+        dest: /etc/apache2/sites-available/pma.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Enable Apache modules
+      community.general.apache2_module:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - proxy
+        - proxy_fcgi
+        - dir
+
+    - name: Disable default Apache site
+      ansible.builtin.file:
+        path: /etc/apache2/sites-enabled/000-default.conf
+        state: absent
+
+    - name: Enable phpMyAdmin VirtualHost
+      ansible.builtin.file:
+        src: /etc/apache2/sites-available/pma.conf
+        dest: /etc/apache2/sites-enabled/pma.conf
+        state: link
+
+    - name: Start and enable Apache service
+      ansible.builtin.systemd:
+        name: apache2
+        state: started
+        enabled: true

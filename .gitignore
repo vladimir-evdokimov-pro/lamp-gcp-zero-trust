@@ -44,4 +44,4 @@ terraform.rc
 # planout
 
 ansible/group_vars/all.yml
-ansible/id_ssh$
+ansible/id_ssh*

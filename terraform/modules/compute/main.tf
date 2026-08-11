@@ -23,7 +23,7 @@ resource "google_compute_instance" "web_vm" {
   labels = var.web_labels
 
   metadata = {
-    enable-oslogin = "TRUE"
+  enable-oslogin = "FALSE"
   }
 
   shielded_instance_config {
@@ -55,11 +55,9 @@ resource "google_compute_instance" "app_vm" {
   }
 
   labels = var.app_labels
-
   metadata = {
-    enable-oslogin = "TRUE"
+  enable-oslogin = "FALSE"
   }
-
   shielded_instance_config {
     enable_integrity_monitoring = true
     enable_secure_boot = true

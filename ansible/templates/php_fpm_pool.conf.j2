@@ -1,0 +1,12 @@
+[www]
+
+user = www-data
+group = www-data
+
+listen = 0.0.0.0:{{ php_fpm_port }}
+
+pm = dynamic
+pm.max_children = {{ php_fpm_max_children }}
+pm.start_servers = {{ php_fpm_start_servers }}
+pm.min_spare_servers = {{ php_fpm_min_spare_servers }}
+pm.max_spare_servers = {{ php_fpm_max_spare_servers }}

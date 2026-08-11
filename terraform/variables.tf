@@ -17,3 +17,8 @@ variable "gcp_apis" {
   description = "List of APIs to enable for realize this configuration"
   type = set(string)
 }
+
+variable "username" {
+  description = "Username for ssh key metadata provision"
+  type = string
+}
