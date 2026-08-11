@@ -11,17 +11,18 @@
 
 ## Executive Summary
 
-This repository demonstrates how to transition a traditional web application into a cloud-native, enterprise-grade environment. The architecture enforces strict network isolation, keyless access mechanisms, centralized secret handling, and dynamic CI/CD configuration management.
+This repository demonstrates how to transition a traditional web application into a cloud-native, enterprise-grade environment. The architecture enforces strict network isolation, keyless access mechanisms, centralized secret handling, and dynamic configuration management.
 
 ---
 
 ## Security & Zero-Trust Posture
 
-* **100% Private Network (No Public IPs):** Web and Application Compute instances operate inside a strictly isolated VPC subnet with zero public IP addresses attached.
-* **Identity-Aware Proxy (IAP) & OS Login:** Bastionless administration. SSH access is granted dynamic access through Google IAP tunnels authenticated via IAM roles.
+* **100% Private Network (No Public IPs on Internal Compute):** Application and Database tiers operate inside isolated VPC subnets without public IP addresses attached.
+* **Identity-Aware Proxy (IAP) & OS Login:** Bastionless administration. SSH access is granted via dynamic Google IAP tunnels authenticated through IAM roles.
 * **Private Service Connect (PSC):** Cloud SQL database connectivity is exposed internally via a dedicated local PSC Endpoint (no VPC Peering or public IP exposure).
 * **Workload Identity Federation (WIF):** Short-lived OIDC tokens for GitHub Actions runners, eliminating long-lived GCP service account keys.
-* **Centralized Secret Management:** Database credentials and runtime configs are dynamically retrieved at boot via GCP Secret Manager.
+* **Centralized Secret Management:** Database credentials and runtime keys are dynamically retrieved via GCP Secret Manager.
+* **Tiered Decoupling:** Apache serves static assets on the Web Tier and proxies FastCGI requests (`:9000`) to PHP-FPM running on an isolated App Tier.
 
 ---
 
@@ -72,10 +73,10 @@ graph TD
 
         subgraph VPC["<font color='#1e40af'><b>Custom VPC Network (100% Private)</b></font>"]
 
-            subgraph SUBNET["<font color='#166534'><b>Private Subnet (10.0.1.0/24)</b></font>"]
-                VM_Web["Web VM (10.0.1.10)<br/>- Apache / FastCGI Proxy<br/>- Label: tier=web"]
-                VM_App["App VM (10.0.1.20)<br/>- PHP-FPM / phpMyAdmin<br/>- Label: tier=app"]
-                PSC_Endpoint["PSC Endpoint (10.0.1.50)<br/>- Local Cloud SQL Interface"]
+            subgraph SUBNET["<font color='#166534'><b>Private Subnets</b></font>"]
+                VM_Web["Web VM: web-server1 (10.0.1.2)<br/>- Apache / Static Assets<br/>- Reverse Proxy FastCGI"]
+                VM_App["App VM: app-server1 (10.0.2.2)<br/>- PHP-FPM / phpMyAdmin Core<br/>- No Public IP"]
+                PSC_Endpoint["PSC Endpoint (10.0.3.2)<br/>- Local Cloud SQL Interface"]
             end
 
             NAT["Cloud Router + Cloud NAT<br/>(Outbound Egress for apt)"]
@@ -100,7 +101,7 @@ graph TD
     GitHub ==>|2. Ansible via IAP Tunnel :22| IAP
     IAP ==>|OS Login / Private SSH| VM_Web
     IAP ==>|OS Login / Private SSH| VM_App
-    VM_App -.->|3. Retrieve DB Password| Secrets
+    VM_App -.->|3. Retrieve Secrets| Secrets
 
     class User,GitHub external;
     class LB,NAT,IAP gcpBlue;
@@ -114,19 +115,38 @@ graph TD
 ## Repository Structure
 
 ```text
-lamp-gcp-zero-trust/
-├── .github/
-│   └── workflows/          # GitHub Actions CI/CD (Terraform & Ansible Validation)
-├── terraform/              # Infrastructure as Code (Modular Design)
-│   ├── modules/            # Reusable modules (VPC, Compute, CloudSQL, IAP, IAM)
-│   ├── main.tf             # Core provider configuration and remote state setup
-│   ├── outputs.tf          # Provisioned infrastructure outputs
-│   └── variables.tf        # Environment input variables
-├── ansible/                # Configuration Management & Hardening
-│   ├── inventory/          # Dynamic GCP Compute Inventory definitions
-│   └── roles/              # Ansible roles (Apache, PHP-FPM, Security Hardening)
-└── docs/                   # Detailed Project Documentation & Runbooks
-    └── setup_guide.md      # Step-by-step infrastructure provisioning guide
+.
+├── README.md
+├── ansible/
+│   ├── ansible.cfg              # Ansible global configuration
+│   ├── inventory.gcp.yml        # GCP Compute dynamic inventory configuration
+│   ├── group_vars/
+│   │   ├── all.yml.example      # Example environment variables template
+│   │   ├── role_app.yml         # Application tier variables
+│   │   └── role_web.yml         # Web tier variables
+│   ├── playbooks/
+│   │   ├── application.yml      # PHP-FPM and phpMyAdmin backend deployment
+│   │   └── webserver.yml        # Apache HTTP Server & static assets setup
+│   └── templates/
+│       ├── apache_vhost.conf.j2 # VirtualHost configuration with FastCGI proxy
+│       ├── php_fpm_pool.conf.j2 # PHP-FPM pool configuration
+│       └── pma_config.inc.php.j2# phpMyAdmin configuration template
+├── docs/
+│   ├── architecture_diagram.png # Architecture visual diagram
+│   └── setup_guide.md           # Step-by-step installation guide
+└── terraform/
+    ├── ansible.tf               # Integration helpers for Ansible inventory
+    ├── main.tf                  # Infrastructure module invocations
+    ├── outputs.tf               # Infrastructure deployment outputs
+    ├── providers.tf             # Terraform provider definitions
+    ├── terraform.tfvars.example # Input variables example template
+    ├── variables.tf             # Core variable definitions
+    └── modules/
+        ├── compute/             # Virtual machine instances setup
+        ├── database/            # Cloud SQL MySQL and PSC provisioning
+        ├── load-balancer/       # GCP External HTTP Load Balancer setup
+        ├── network/             # VPC, subnets, NAT, and firewall rules
+        └── security/            # IAM, Service Accounts, Secret Manager & IAP
 ```
 
 ---
@@ -136,23 +156,59 @@ lamp-gcp-zero-trust/
 - [x] **Phase 1: Architecture & Network Topology Definition** (VPC, Subnetting, Security Boundaries)
 - [x] **Phase 2: Repository Governance** (Branch Protection, GitOps Workflows)
 - [x] **Phase 3: Core Infrastructure Provisioning (Terraform)**
-  - [X] Custom VPC, Subnets, Cloud NAT & Router
-  - [X] Private Compute Instances (Web & App Tiers)
-  - [X] Cloud SQL (MySQL) with Private Service Connect (PSC)
-- [X] **Phase 4: Security & IAM Hardening**
-  - [X] Workload Identity Federation setup
-  - [X] Secret Manager integration
-  - [X] IAP SSH Tunneling configuration
-- [ ] **Phase 5: Automated Configuration (Ansible)**
-  - [ ] Web/App runtime setup (Apache, PHP-FPM)
-  - [ ] OS Security hardening & dynamic inventory integration
+  - [x] Custom VPC, Subnets, Cloud NAT & Router
+  - [x] Private Compute Instances (Web & App Tiers)
+  - [x] Cloud SQL (MySQL) with Private Service Connect (PSC)
+- [x] **Phase 4: Security & IAM Hardening**
+  - [x] Workload Identity Federation setup
+  - [x] Secret Manager integration
+  - [x] IAP SSH Tunneling configuration
+- [x] **Phase 5: Automated Configuration (Ansible)**
+  - [x] Web tier setup (Apache, FastCGI Proxy, Static Assets)
+  - [x] App tier setup (PHP-FPM, phpMyAdmin Core execution)
+  - [x] Dynamic inventory integration
 - [ ] **Phase 6: Continuous Integration & Validation**
+
+---
+
+## Deployment Quickstart
+
+### Prerequisites
+
+* **Google Cloud SDK (`gcloud`)** installed and authenticated.
+* **Terraform** `>= 1.5.0`
+* **Ansible** `>= 2.15.0` with the `google.cloud` collection.
+* Local SSH keypair generated at `ansible/id_ssh`.
+
+### 1. Provision Infrastructure
+
+```bash
+cd terraform
+cp terraform.tfvars.example terraform.tfvars
+# Update terraform.tfvars with your GCP project details
+terraform init
+terraform apply
+```
+
+### 2. Configure Software Stack
+
+```bash
+cd ../ansible
+cp group_vars/all.yml.example group_vars/all.yml
+# Update variables in group_vars/all.yml if necessary
+
+# Deploy Web Tier (Apache Reverse Proxy & Static Assets)
+ansible-playbook -i inventory.gcp.yml playbooks/webserver.yml
+
+# Deploy Application Tier (PHP-FPM & phpMyAdmin Backend)
+ansible-playbook -i inventory.gcp.yml playbooks/application.yml
+```
 
 ---
 
 ## Getting Started
 
-To replicate or deploy this infrastructure, refer to the step-by-step setup documentation:
+To replicate or deploy this infrastructure in detail, refer to the step-by-step setup documentation:  
 [Read the Setup Guide (docs/setup_guide.md)](docs/setup_guide.md)
 
 ---
