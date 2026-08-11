@@ -1,0 +1,24 @@
+<?php
+/**
+ * {{ ansible_managed }}
+ */
+declare(strict_types=1);
+
+/**
+ * Secret Blowfish (32 caractères)
+ */
+$cfg['blowfish_secret'] = '{{ pma_blowfish_secret | replace("'", "\\'") }}';
+
+/**
+ * Configuration des serveurs
+ */
+$i = 0;
+
+$i++;
+$cfg['Servers'][$i]['auth_type'] = 'cookie';
+$cfg['Servers'][$i]['host'] = '{{ db_host }}';
+$cfg['Servers'][$i]['compress'] = false;
+$cfg['Servers'][$i]['AllowNoPassword'] = false;
+
+$cfg['AuthLog'] = 'syslog';
+$cfg['AuthLogSuccess'] = 'syslog';

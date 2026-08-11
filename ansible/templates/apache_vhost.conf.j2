@@ -1,0 +1,16 @@
+<VirtualHost *:80>
+  ServerName _
+  DocumentRoot /var/www/pma
+  DirectoryIndex index.php index.html
+
+  <Directory /var/www/pma>
+    Options -Indexes +FollowSymLinks
+    AllowOverride All
+    Require all granted
+  </Directory>
+
+  <FilesMatch \.php$>
+        SetHandler "proxy:fcgi://{{ app_server_host | default('app-server1') }}:{{ php_fpm_port | default(9000) }}"
+  </FilesMatch>
+
+</VirtualHost>
