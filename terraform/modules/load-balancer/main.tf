@@ -24,7 +24,7 @@ resource "google_compute_health_check" "hc" {
 
   http_health_check {
     port = 80
-    request_path = "/healthz"
+    request_path = "/"
   }
 }
 
