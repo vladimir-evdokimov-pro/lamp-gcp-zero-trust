@@ -61,6 +61,7 @@
         owner: www-data
         group: www-data
         mode: "0640"
+      # noqa: no-relative-paths
 
     - name: Applying PHP-FPM pool configuration
       ansible.builtin.template:
@@ -69,6 +70,7 @@
         owner: root
         group: root
         mode: "0644"
+      # noqa: no-relative-paths
       notify:
         - Restart PHP-FPM
 
@@ -77,4 +79,3 @@
       ansible.builtin.service:
         name: "php{{ installed_php_version.stdout }}-fpm"
         state: restarted
-        

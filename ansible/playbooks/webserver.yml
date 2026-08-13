@@ -41,6 +41,7 @@
         owner: root
         group: root
         mode: "0644"
+      # noqa: no-relative-paths
 
     - name: Enable Apache modules
       community.general.apache2_module:
@@ -67,4 +68,3 @@
         name: apache2
         state: started
         enabled: true
-        
