@@ -1,5 +1,5 @@
 resource "random_password" "pma_secret" {
-  length = 32
+  length  = 32
   special = false
 }
 
@@ -20,8 +20,8 @@ resource "tls_private_key" "ssh_key" {
 }
 
 resource "local_file" "ans_priv_key" {
-  content = tls_private_key.ssh_key.private_key_openssh
-  filename = "${path.module}/../ansible/id_ssh"
+  content         = tls_private_key.ssh_key.private_key_openssh
+  filename        = "${path.module}/../ansible/id_ssh"
   file_permission = "0600"
 }
 

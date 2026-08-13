@@ -25,6 +25,6 @@ output "secret_id" {
 
 output "ssh_priv_key" {
   description = "SSH key for Ansible connection"
-  value = tls_private_key.ssh_key.private_key_openssh
-  sensitive = true
+  value       = tls_private_key.ssh_key.private_key_openssh
+  sensitive   = true
 }
