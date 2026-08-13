@@ -2,7 +2,6 @@ name: CD Pipeline
 
 on:
   workflow_dispatch:
-    
 
 permissions:
   contents: read
@@ -37,16 +36,20 @@ jobs:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
-      - name: Terraform check
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform init
-        id: init
         run: terraform init -input=false
 
       - name: Terraform Apply
-        id: Apply
         run: terraform apply -auto-approve -input=false
+
+      - name: Save generated group_vars artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ansible-group-vars
+          path: ansible/group_vars/all.yml
 
   ansible-cd:
     name: "Ansible Application"
@@ -57,17 +60,28 @@ jobs:
         working-directory: ./ansible
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: google-github-actions/auth@v2
+      - name: Check code
+        uses: actions/checkout@v4
+
+      - name: GCP authentication
+        uses: 'google-github-actions/auth@v2'
         with:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-      - uses: actions/setup-python@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+
+      - name: Download generated group_vars artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ansible-group-vars
+          path: ansible/group_vars
 
       - name: Extract ssh key from terraform
         run: |
@@ -76,11 +90,11 @@ jobs:
           terraform output -raw ssh_private_key > ../ansible/id_ssh
           chmod 600 ../ansible/id_ssh
 
-      - name: Ansible configuration
+      - name: Install Ansible dependencies
         run: pip install ansible google-auth requests
 
       - name: Application Playbook
-        run: ansible-playbook -i inventory.gcp.yml playbooks/application.yml
+        run: ansible-playbook -i inventory.gcp.yml playbooks/application.yml --private-key id_ssh
 
       - name: Webserver Playbook
-        run: ansible-playbook -i inventory.gcp.yml playbooks/webserver.yml
+        run: ansible-playbook -i inventory.gcp.yml playbooks/webserver.yml --private-key id_ssh
