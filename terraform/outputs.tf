@@ -22,3 +22,9 @@ output "secret_id" {
   description = "Secret Manager secret ID/name containing DB credentials"
   value       = module.security.secret_id
 }
+
+output "ssh_priv_key" {
+  description = "SSH key for Ansible connection"
+  value = tls_private_key.ssh_key.private_key_openssh
+  sensitive = true
+}
