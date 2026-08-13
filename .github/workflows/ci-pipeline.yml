@@ -8,9 +8,15 @@ permissions:
   contents: read
   id-token: write
 
+env:
+  TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
+  TF_VAR_region: ${{ vars.GCP_REGION }}
+  TF_VAR_zone: ${{ vars.GCP_ZONE }}
+  TF_VAR_username: ${{ vars.GCP_VM_USERNAME }}
+
 jobs:
   terraform-ci:
-    name: "Terraform validation"
+    name: "Terraform Validation"
     runs-on: "ubuntu-latest"
     defaults:
       run:
