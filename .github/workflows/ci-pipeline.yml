@@ -1,0 +1,67 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform-ci:
+    name: "Terraform validation"
+    runs-on: "ubuntu-latest"
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+      - name: Check code
+        uses: actions/checkout@v4
+
+      - name: GCP authentication
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Terraform check
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt --check
+        continue-on-error: false
+
+      - name: Terraform init
+        id: init
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false
+          
+  ansible-ci:
+    name: "Ansible Validation"
+    runs-on: "ubuntu-latest"
+    defaults:
+      run:
+        working-directory: ./ansible
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ansible configuration
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Run ansible-lint
+        run: pip install ansible ansible-lint
+
+      - name: Run ansible-lint
+        run: ansible-lint playbooks/*.yml
