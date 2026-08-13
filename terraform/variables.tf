@@ -22,7 +22,8 @@ variable "gcp_apis" {
     "secretmanager.googleapis.com",
     "iap.googleapis.com",
     "servicenetworking.googleapis.com",
-    "iamcredentials.googleapis.com"
+    "iamcredentials.googleapis.com",
+    "iam.googleapis.com"
   ]
 }
 
