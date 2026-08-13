@@ -1,9 +1,8 @@
 name: CD Pipeline
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    
 
 permissions:
   contents: read
@@ -23,6 +22,7 @@ jobs:
   terraform-cd:
     name: "Terraform Application"
     runs-on: "ubuntu-latest"
+    environment: production
     defaults:
       run:
         working-directory: ./terraform
