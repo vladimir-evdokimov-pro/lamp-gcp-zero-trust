@@ -79,4 +79,3 @@
       ansible.builtin.service:
         name: "php{{ installed_php_version.stdout }}-fpm"
         state: restarted
-        
