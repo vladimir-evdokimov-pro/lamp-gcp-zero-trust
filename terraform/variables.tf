@@ -16,7 +16,7 @@ variable "zone" {
 variable "gcp_apis" {
   description = "List of APIs to enable for realize this configuration"
   type        = set(string)
-  default = [ 
+  default = [
     "compute.googleapis.com",
     "sqladmin.googleapis.com",
     "secretmanager.googleapis.com",
