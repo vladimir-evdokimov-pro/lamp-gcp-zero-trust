@@ -32,46 +32,46 @@ variable "sa_app_email" {
 
 variable "machine_type" {
   description = "Type of Machine used for instance configuration"
-  type = string
-  default = "e2-micro"
+  type        = string
+  default     = "e2-micro"
 }
 
 variable "web_vm_name" {
   description = "Name for Web instance configuration"
-  type = string
-  default = "web-server1"
+  type        = string
+  default     = "web-server1"
 }
 
 variable "web_labels" {
   description = "Resource labels to apply to web resources"
-  type = map(string)
+  type        = map(string)
   default = {
-    "role" = "web"
-    "env" = "prod"
-    "tier" = "frontend"
+    "role"       = "web"
+    "env"        = "prod"
+    "tier"       = "frontend"
     "managed_by" = "terraform"
   }
 }
 
 variable "app_vm_name" {
   description = "Name for App instance configuration"
-  type = string
-  default = "app-server1"
+  type        = string
+  default     = "app-server1"
 }
 
 variable "app_labels" {
   description = "Resource labels to apply to app resources"
-  type = map(string)
+  type        = map(string)
   default = {
-    "role" = "app"
-    "env" = "prod"
-    "tier" = "backend"
+    "role"       = "app"
+    "env"        = "prod"
+    "tier"       = "backend"
     "managed_by" = "terraform"
   }
 }
 
 variable "image_boot" {
   description = "Choose image for boot instances"
-  type = string
-  default = "debian-cloud/debian-12"
+  type        = string
+  default     = "debian-cloud/debian-12"
 }
