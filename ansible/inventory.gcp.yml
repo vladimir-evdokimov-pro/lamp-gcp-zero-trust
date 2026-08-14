@@ -3,6 +3,10 @@ projects:
   - lamp-3tier-production
 auth_kind: application_default
 
+groups:
+  role_web: "'web' in name"
+  role_app: "'app' in name"
+
 keyed_groups:
   - key: labels.role
     prefix: role
