@@ -1,7 +1,11 @@
 plugin: google.cloud.gcp_compute
 projects:
   - lamp-3tier-production
-auth_kind: application_default
+auth_kind: application
+
+groups:
+  role_web: "'web' in name"
+  role_app: "'app' in name"
 
 keyed_groups:
   - key: labels.role
