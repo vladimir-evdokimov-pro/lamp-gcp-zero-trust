@@ -1,9 +1,14 @@
 plugin: google.cloud.gcp_compute
 projects:
   - lamp-3tier-production
-auth_kind: application
+auth_kind: application_default
+
 keyed_groups:
   - key: labels.role
     prefix: role
+
 hostnames:
   - name
+
+compose:
+  ansible_host: name
