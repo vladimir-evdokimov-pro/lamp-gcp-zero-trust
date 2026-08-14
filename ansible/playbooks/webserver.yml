@@ -41,6 +41,7 @@
         owner: root
         group: root
         mode: "0644"
+      notify: Reload Apache
       # noqa: no-relative-paths
 
     - name: Enable Apache modules
@@ -51,20 +52,29 @@
         - proxy
         - proxy_fcgi
         - dir
+      notify: Reload Apache
 
     - name: Disable default Apache site
       ansible.builtin.file:
         path: /etc/apache2/sites-enabled/000-default.conf
         state: absent
+      notify: Reload Apache
 
     - name: Enable phpMyAdmin VirtualHost
       ansible.builtin.file:
         src: /etc/apache2/sites-available/pma.conf
         dest: /etc/apache2/sites-enabled/pma.conf
         state: link
+      notify: Reload Apache
 
     - name: Start and enable Apache service
       ansible.builtin.systemd:
         name: apache2
-        state: started
+        state: restarted
         enabled: true
+
+  handlers:
+    - name: Reload Apache
+      ansible.builtin.systemd:
+        name: apache2
+        state: reloaded
